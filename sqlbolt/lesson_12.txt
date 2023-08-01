@@ -1,0 +1,8 @@
+1. Find the number of movies each director has directed
+SELECT director, count(Title) FROM movies
+GROUP BY Director;
+
+2. Find the total domestic and international sales that can be attributed to each director
+SELECT director, sum(domestic_sales+international_sales) FROM movies m
+JOIN boxoffice b on m.id = b.movie_id
+GROUP BY Director;
