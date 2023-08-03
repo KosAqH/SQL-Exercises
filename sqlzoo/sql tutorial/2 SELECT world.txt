@@ -54,7 +54,7 @@ WHERE GDP > 1000000000000
 11. Show the name and capital where the name and the capital have the same number of characters.
 
 SELECT name, capital FROM world
- WHERE LEN(name) = LEN(continent);
+ WHERE LENGTH(name) = LENGTH(continent);
 
 12. Show the name and the capital where the first letters of each match. Don't include countries where the name and the capital are the same word.
 
