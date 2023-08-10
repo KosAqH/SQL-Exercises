@@ -1,0 +1,53 @@
+6. List the Company name and the number of calls for those companies with more than 18 calls.
+
+SELECT Customer.company_name, Count(Issue.Call_ref) as CC
+FROM Issue
+JOIN Caller ON Caller.Caller_id = Issue.Caller_id
+JOIN Customer ON Customer.Company_ref=Caller.Company_ref
+GROUP BY Customer.company_name
+HAVING COUNT(*) > 18
+
+7. Find the callers who have never made a call. Show first name and last name
+
+SELECT Caller.first_name, Caller.last_name
+FROM Caller
+LEFT JOIN Issue ON Caller.Caller_id=Issue.Caller_id
+WHERE Issue.Call_ref IS NULL
+
+8. For each customer show: Company name, contact name, number of calls where the number of calls is fewer than 5
+
+SELECT Customer.company_name, ca2.first_name, ca2.last_name, Count(*) as nc
+FROM Customer
+JOIN Caller ca ON ca.Company_ref = Customer.Company_ref
+JOIN Caller ca2 ON ca2.Caller_id = Customer.Contact_id
+JOIN Issue ON ca.caller_id= Issue.Caller_id
+GROUP BY Customer.company_name, ca2.first_name, ca2.last_name
+HAVING COUNT(*) < 5
+
+9. For each shift show the number of staff assigned. Beware that some roles may be NULL and that the same person might have been assigned to multiple roles (The roles are 'Manager', 'Operator', 'Engineer1', 'Engineer2').
+
+SELECT DATE(a.shift_date), a.Shift_type, COUNT(DISTINCT a.role) as cw
+FROM 
+(SELECT shift_date, shift_type, manager AS role
+FROM Shift
+UNION ALL
+SELECT shift_date, shift_type, operator AS role
+FROM Shift
+UNION ALL
+SELECT shift_date, shift_type, engineer1 AS role
+FROM Shift
+UNION ALL
+SELECT shift_date, shift_type, engineer2 AS role
+FROM Shift) AS a
+
+GROUP BY Shift_date, shift_type
+
+10. Caller 'Harry' claims that the operator who took his most recent call was abusive and insulting. Find out who took the call (full name) and when.
+
+SELECT Staff.first_name, Staff.last_name, Issue.call_date
+FROM Staff
+JOIN Issue ON Staff.Staff_code = Issue.Taken_by
+JOIN Caller ON Caller.Caller_id = Issue.Caller_id
+WHERE Caller.First_name = 'Harry'
+Order BY Issue.call_date DESC
+LIMIT 1
