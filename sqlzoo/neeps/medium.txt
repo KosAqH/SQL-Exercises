@@ -1,0 +1,90 @@
+6. Show the 'size' of each of the co72010 events. Size is the total number of students attending each event.
+
+SELECT event.id, SUM(student.sze)
+FROM event
+
+JOIN attends ON event.id=attends.event
+JOIN student ON student.id=attends.student
+
+WHERE event.modle = 'co72010'
+GROUP BY event.id
+
+7. For each post-graduate module, show the size of the teaching team. (post graduate modules start with the code co7).
+
+SELECT COUNT(DISTINCT staff), modle
+FROM teaches
+
+JOIN event ON teaches.event=event.id
+
+WHERE modle LIKE 'co7%'
+GROUP BY modle
+
+8. Give the full name of those modules which include events taught for fewer than 10 weeks.
+
+SELECT DISTINCT modle.name
+FROM modle
+
+JOIN event ON modle.id=event.modle
+JOIN occurs ON occurs.event=event.id
+
+GROUP BY event.id, modle.name
+
+HAVING COUNT(occurs.week) < 10
+
+9. Identify those events which start at the same time as one of the co72010 lectures.
+
+with start_time as (
+SELECT event.id AS id, event.dow AS dow, event.tod AS tod
+FROM event
+WHERE event.modle != 'co72010')
+
+
+SELECT event.id, event.dow, event.tod, start_time.id, start_time.dow, start_time.tod
+FROM event, start_time
+
+WHERE event.modle = 'co72010'
+AND event.dow = start_time.dow
+AND event.tod = start_time.tod
+
+-------
+
+with start_time as (
+SELECT event.id AS id, event.dow AS dow, event.tod AS tod
+FROM event
+WHERE event.modle != 'co72010')
+
+
+SELECT start_time.id
+FROM event, start_time
+
+WHERE event.modle = 'co72010'
+AND event.dow = start_time.dow
+AND event.tod = start_time.tod
+
+10. How many members of staff have contact time which is greater than the average?
+
+WITH contact_times AS (
+SELECT AVG(avg_hours) as avg_contact_time
+FROM
+(
+    SELECT SUM(event.duration) AS avg_hours
+    FROM event
+
+    JOIN teaches ON teaches.event = event.id
+    JOIN staff ON staff.id = teaches.staff
+
+    GROUP BY staff.id
+) as q
+)
+
+SELECT COUNT(*)
+FROM (
+     SELECT SUM(event.duration), avg_contact_time 
+     FROM event
+
+     JOIN teaches ON teaches.event = event.id
+     JOIN staff ON staff.id = teaches.staff
+     JOIN contact_times 
+     GROUP BY avg_contact_time, staff.id
+     HAVING SUM(event.duration) > avg_contact_time 
+) as t
