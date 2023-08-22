@@ -1,0 +1,52 @@
+1. List the owners (name and address) of Vehicles caught by camera 1 or 18 without duplication.
+
+SELECT DISTINCT keeper.name, keeper.address
+FROM keeper
+JOIN vehicle ON vehicle.keeper = keeper.id
+JOIN image ON image.reg = vehicle.id
+WHERE camera = 1 OR camera = 18
+
+2. Show keepers (name and address) who have more than 5 vehicles.
+
+SELECT keeper.name, keeper.address
+FROM keeper
+JOIN vehicle ON vehicle.keeper = keeper.id
+GROUP BY keeper.name, keeper.address
+HAVING  COUNT(*) > 5
+
+3. For each vehicle show the number of current permits (suppose today is the 1st of Feb 2007). The list should include the vehicle.s registration and the number of permits. Current permits can be determined based on charge types, e.g. for weekly permit you can use the date after 24 Jan 2007 and before 02 Feb 2007.
+
+SELECT reg, SUM( 
+CASE
+    WHEN permit.chargeType = 'Daily' AND permit.sDate = '2007-02-01' THEN 1
+    WHEN permit.chargeType = 'Weekly' AND permit.sDate BETWEEN '2007-01-25' AND '2007-02-01' THEN 1
+    WHEN permit.chargeType = 'Monthly' AND permit.sDate BETWEEN '2007-01-01' AND '2007-02-01' THEN 1
+    WHEN permit.chargeType = 'Annualy' AND permit.sDate BETWEEN '2006-02-01' AND '2007-02-01' THEN 1
+ELSE 0
+END) as n_current_permits
+FROM permit
+
+GROUP BY reg
+
+4. Obtain a list of every vehicle passing camera 10 on 25th Feb 2007. Show the time, the registration and the name of the keeper if available.
+
+SELECT image.whn, image.reg, keeper.name
+FROM image
+JOIN vehicle ON image.reg = vehicle.id
+JOIN keeper ON vehicle.keeper = keeper.id 
+WHERE DATE(image.whn) = '2007-02-25' AND image.camera = 10
+
+5. List the keepers who have more than 4 vehicles and one of them must have more than 2 permits. The list should include the names and the number of vehicles.
+
+SELECT keeper.name, COUNT(vehicle.id)
+FROM keeper
+JOIN vehicle ON vehicle.keeper = keeper.id
+JOIN permit ON permit.reg = vehicle.id
+WHERE vehicle.id IN (
+  SELECT permit.reg
+  FROM permit
+  GROUP BY permit.reg
+  HAVING COUNT(*) > 2
+)
+GROUP BY keeper.name
+HAVING COUNT(vehicle.id) > 4

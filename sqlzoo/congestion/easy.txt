@@ -1,0 +1,34 @@
+1. Show the name and address of the keeper of vehicle SO 02 PSP.
+
+SELECT name, address
+FROM keeper
+JOIN vehicle ON keeper.id = vehicle.keeper
+WHERE vehicle.id = 'SO 02 PSP'
+
+2. Show the number of cameras that take images for incoming vehicles.
+
+SELECT id 
+FROM camera
+WHERE perim = 'IN'
+
+3. List the image details taken by Camera 10 before 26 Feb 2007.
+
+SELECT * FROM image
+WHERE camera = 10
+  AND whn < '2007-02-26'
+
+4. List the number of images taken by each camera. Your answer should show how many images have been taken by camera 1, camera 2 etc. The list must NOT include the images taken by camera 15, 16, 17, 18 and 19.
+
+SELECT camera, COUNT(*) 
+FROM image
+WHERE camera NOT IN (15, 16, 17,18, 19)
+GROUP BY camera
+
+5. A number of vehicles have permits that start on 30th Jan 2007. List the name and address for each keeper in alphabetical order without duplication.
+
+SELECT DISTINCT keeper.name, keeper.address
+FROM keeper
+JOIN vehicle ON vehicle.keeper = keeper.id
+JOIN permit ON permit.reg = vehicle.id
+WHERE permit.sdate = '2007-01-30'
+ORDER BY 1
