@@ -1,0 +1,52 @@
+1. List the post code, order number, order date and garment descriptions for all items associated with Ms Brown.
+
+SELECT jmcust.c_post_code, dress_order.order_no, dress_order.order_date, garment.description
+FROM jmcust
+
+JOIN dress_order ON jmcust.c_no = dress_order.cust_no
+JOIN order_line ON dress_order.order_no = order_line.order_ref
+JOIN quantities ON ol_style = quantities.style_q AND ol_size=size_q
+JOIN garment ON quantities.style_q = garment.style_no
+
+WHERE jmcust.c_name = 'Ms Brown'
+
+2. List the customer name, postal information, order date and order number of all orders that have been completed.
+
+SELECT jmcust.c_name, jmcust.c_post_code, dress_order.order_no, dress_order.order_date 
+FROM jmcust
+JOIN dress_order ON jmcust.c_no = dress_order.cust_no
+JOIN order_line ON dress_order.order_no = order_line.order_ref
+WHERE completed = 'Y'
+
+3. Which garments have been made or are being made from 'red abstract' or 'blue abstract' coloured materials.
+
+SELECT garment.description, material.colour
+FROM garment
+
+JOIN quantities ON quantities.style_q = garment.style_no
+JOIN order_line ON ol_style = quantities.style_q AND order_line.ol_size=quantities.size_q
+JOIN material ON order_line.ol_material = material.material_no
+
+WHERE material.colour = 'red abstract' OR material.colour = 'blue abstract' 
+
+4. How many garments has each dressmaker constructed? You should give the number of garments and the name and postal information of each dressmaker.
+
+SELECT dressmaker.d_name, dressmaker.d_post_code, COUNT(*)
+FROM dressmaker
+
+JOIN construction ON dressmaker.d_no = construction.maker
+JOIN order_line ON construction.order_ref = order_line.order_ref AND construction.line_ref = order_line.line_no
+
+GROUP BY d_name, d_post_code
+
+5. Give the names of those dressmakers who have finished items made from silk for completed orders.
+
+SELECT DISTINCT dressmaker.d_name
+FROM dressmaker
+
+JOIN construction ON dressmaker.d_no = construction.maker
+JOIN order_line ON construction.order_ref = order_line.order_ref AND construction.line_ref = order_line.line_no
+JOIN dress_order ON dress_order.order_no = order_line.order_ref
+JOIN material ON order_line.ol_material = material.material_no
+
+WHERE completed = 'Y' AND fabric = 'Silk'
